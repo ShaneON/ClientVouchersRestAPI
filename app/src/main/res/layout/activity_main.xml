@@ -27,6 +27,32 @@
             android:id="@+id/search_button"
             android:onClick="onSearchForClient"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enter amount for voucher"
+            android:textSize="20sp"
+            android:id="@+id/voucher_textview"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/voucher_edittext"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="create"
+            android:id="@+id/voucher_button"
+            android:onClick="onCreateVoucher"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:id="@+id/amount_textview"/>
+
 
 
 </LinearLayout>
