@@ -7,43 +7,84 @@
     android:orientation="vertical"
     tools:context="com.phorest.shane.clientvouchers.MainActivity">
 
+
         <TextView
+            android:paddingTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Enter client's email or phone no."
+            android:gravity="center"
             android:textSize="20sp"
             android:id="@+id/search_textview"/>
 
+        <TextView
+            android:paddingTop="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="email"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:id="@+id/email_textview"/>
+
         <EditText
+            android:paddingTop="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/search_edittext"
             />
 
-        <Button
+        <TextView
+            android:paddingTop="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="phone"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:id="@+id/phone_textview"/>
+
+        <EditText
+            android:paddingTop="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/phone_edittext"
+            android:paddingBottom="20dp"
+            />
+
+        <Button
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="search"
+            android:layout_gravity="center_horizontal"
+            android:textColor="#FFFF"
+            android:background="@drawable/purple_button"
             android:id="@+id/search_button"
-            android:onClick="onSearchForClient"/>
+            android:onClick="onSearchForClient"
+            />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="15dp"
             android:text="Enter amount for voucher"
+            android:gravity="center"
             android:textSize="20sp"
             android:id="@+id/voucher_textview"/>
 
         <EditText
+            android:paddingTop="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/voucher_edittext"
             />
 
         <Button
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="create"
+            android:layout_gravity="center_horizontal"
+            android:textColor="#FFFF"
+            android:background="@drawable/purple_button"
             android:id="@+id/voucher_button"
             android:onClick="onCreateVoucher"/>
 

@@ -14,7 +14,10 @@ import retrofit2.http.Query;
 public interface ApiService {
 
     @GET("eTC3QY5W3p_HmGHezKfxJw/client")
-    Call<PageResponse> getInfo(@Query("email") String email);
+    Call<PageResponse> getInfoByEmail(@Query("email") String email);
+
+    @GET("eTC3QY5W3p_HmGHezKfxJw/client")
+    Call<PageResponse> getInfoByPhone(@Query("mobile") String mobile);
 
     @GET("eTC3QY5W3p_HmGHezKfxJw/client")
     Call<ResponseBody> login();
