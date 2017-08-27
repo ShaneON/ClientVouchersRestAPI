@@ -8,3 +8,5 @@ Under those is a field for entering the amount on the voucher and a button to cr
 For some reason the branchId's vale wouldn't take to its field in the object so I wasn't able to use it.
 
 One problem with the app is that if you search for an email or phone number thats not in the api it will crash, because of how retrofit handles empty responses. I didnt have time to fix this.
+
+The apk is available above for download (clientvouchers.apk)
