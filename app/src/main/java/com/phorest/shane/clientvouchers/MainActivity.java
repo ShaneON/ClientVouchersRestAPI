@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.Interceptor;
@@ -26,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
 
     private List<Client> clientList;
-    private String clientId;
+    private String currentClientId = null;
     private ApiService apiService;
 
     private EditText emailEditText;
@@ -48,7 +50,11 @@ public class MainActivity extends AppCompatActivity {
         emailEditText = (EditText) findViewById(R.id.search_edittext);
         phoneEditText = (EditText) findViewById(R.id.phone_edittext);
 
+        setUpRetrofit();
+    }
 
+    private void setUpRetrofit() {
+        //Sets the authorization header value for HTTP requests with OKHTTP client
         Interceptor interceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -59,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        //Logs the contents and stats of HTTP requests
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -68,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         builder.interceptors().add(logging);
         OkHttpClient client = builder.build();
 
+        //build the retrofit object with endpoint and httpclient
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://api-gateway-dev.phorest.com/third-party-api-server/api/business/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -75,13 +83,14 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         authorizationRequest();
-
     }
 
+    //Enter authorization credentials to access api
     private void authorizationRequest() {
         apiService = retrofit.create(ApiService.class);
         Call<ResponseBody> call = apiService.login();
 
+        //Sends request asynchronously for authorization and waits for response
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -97,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //Triggered when user clicks search
     public void onSearchForClient(View view) {
         Call<PageResponse> call;
         if(!"".equals(emailEditText.getText().toString())){
@@ -106,13 +116,16 @@ public class MainActivity extends AppCompatActivity {
 
         else call = apiService.getInfoByPhone(phoneEditText.getText().toString());
 
+        //Sends request asynchronously for getting client and waits for response,
+        //the first element from the returned list of clients is chosen and the global
+        //currentClientId variable is updated
         call.enqueue(new Callback<PageResponse>() {
             @Override
             public void onResponse(Call<PageResponse> call, Response<PageResponse> response) {
                 PageResponse pageRes = response.body();
                 clientList = pageRes.embedded.clients;
-                clientId = clientList.get(0).clientId;
-                Toast.makeText(MainActivity.this, "Found client with ID " + clientId,
+                currentClientId = clientList.get(0).clientId;
+                Toast.makeText(MainActivity.this, "Found client with ID " + currentClientId,
                         Toast.LENGTH_SHORT).show();
             }
 
@@ -126,35 +139,55 @@ public class MainActivity extends AppCompatActivity {
         phoneEditText.setText("");
     }
 
+    //Called when user clicks to create voucher. First checks that a client has
+    //been selected.
     public void onCreateVoucher(View view) {
-        String amountStr = voucherEditText.getText().toString();
-        if(!"".equals(amountStr)){
-            //Date issueDate = Calendar.getInstance().getTime();
-            //Date expiryDate = Calendar.getInstance().getTime()
-            //String expiryDate =
-            final double amount = Double.parseDouble(voucherEditText.getText().toString());
-            Voucher voucher = new Voucher(clientId, "SE-J0emUgQnya14mOGdQSw", "2018-07-11", "2017-07-11", amount);
-            Call<Voucher> call = apiService.createVoucher(voucher);
+        if(null != currentClientId){
+            String amountStr = voucherEditText.getText().toString();
+            if(!"".equals(amountStr)){
+                String issueDate = createDate(0);
+                String expiryDate = createDate(1);
+                final double amount = Double.parseDouble(voucherEditText.getText().toString());
 
-            call.enqueue(new Callback<Voucher>() {
-                @Override
-                public void onResponse(Call<Voucher> call, Response<Voucher> response) {
-                    Voucher v = response.body();
-                    String displayVoucherAmount = Double.toString(v.getOriginalBalance());
-                    Toast.makeText(MainActivity.this, "You created a voucher worth " + displayVoucherAmount +
-                             " for client " + clientId, Toast.LENGTH_SHORT).show();
+                //Make Voucher object and create Call object for the createVoucher request
+                Voucher voucher = new Voucher(currentClientId, "SE-J0emUgQnya14mOGdQSw", expiryDate, issueDate, amount);
+                Call<Voucher> call = apiService.createVoucher(voucher);
 
-                }
+                //Sends request asynchronously to post voucher and waits for response, once
+                //response is received, displays details to user.
+                call.enqueue(new Callback<Voucher>() {
+                    @Override
+                    public void onResponse(Call<Voucher> call, Response<Voucher> response) {
+                        Voucher v = response.body();
+                        String displayVoucherAmount = Double.toString(v.getOriginalBalance());
+                        Toast.makeText(MainActivity.this, "You created a voucher worth " + displayVoucherAmount +
+                                " for client " + currentClientId, Toast.LENGTH_SHORT).show();
+                        currentClientId = null;
+                    }
 
-                @Override
-                public void onFailure(Call<Voucher> call, Throwable t) {
-                    Toast.makeText(MainActivity.this, "There was a failure in the connection.",
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void onFailure(Call<Voucher> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "There was a failure in the connection.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            else Toast.makeText(MainActivity.this, "Please enter an amount.", Toast.LENGTH_SHORT).show();
         }
-        else Toast.makeText(MainActivity.this, "Please enter an amount.", Toast.LENGTH_SHORT).show();
+        else Toast.makeText(MainActivity.this, "Please enter a client's email or phone no.", Toast.LENGTH_SHORT).show();
 
         voucherEditText.setText("");
+    }
+
+    //Creates the issue and expiry dates for the voucher using todays date.
+    private String createDate(int i) {
+        Date date = new Date(); // your date
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        int year = cal.get(Calendar.YEAR) + i;
+        //Month starts at 0
+        int month = cal.get(Calendar.MONTH) + 1;
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        return year + "-" + month + "-" + day;
     }
 }

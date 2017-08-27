@@ -4,9 +4,10 @@ package com.phorest.shane.clientvouchers;
  * Created by hp on 25/08/2017.
  */
 
+//Voucher object which is sent to api
+
 public class Voucher {
 
-    private Integer id;
     private String clientId;
     private String creatingBranchId;
     private String expiryDate;
@@ -20,10 +21,6 @@ public class Voucher {
         this.expiryDate = expiryDate;
         this.issueDate = issueDate;
         this.originalBalance = originalBalance;
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     public double getOriginalBalance() {
